@@ -31,33 +31,36 @@ tables.map(
     (attrs[`${table}+Model`] = require(process.cwd() + `/models/${table}`))
 );
 // CREATING ARRAY FOR DB MODELS
-const models = Object.values(attrs);
+const arr = Object.values(attrs);
 
-// console.log(models)
-console.log(models[0].schema)
+// console.log(arr)
 
-const arr = [];
+const fields = [];
+const models = []
 // EXTRACTING ATTRIBUTES FROM MODELS
-// models.forEach((model) => {
-//   console.log(model.schema);
-// });
+arr.forEach((model) => {
+  fields.push(model.schema.obj);
+  models.push(model.collection.collectionName);
+});
 
-const fieldsArr = [];
+// console.log(fields)
+// console.log(models)
+
+// const fieldsArr = [];
 // EXTRACTING DB COLUMNS VALUES
 // arr.forEach((item) => {
 //   fieldsArr.push(Object.values(item));
 // });
 
-// console.log(fieldsArr)
 //
-// app.listen(3001, (req, res) => {
-//   console.log(" visualization server up at http://localhost:3001");
-// });
+app.listen(3001, (req, res) => {
+  console.log(" visualization server up at http://localhost:3001");
+});
 
 // SETTING ROUTE TO home.ejs
-// app.get("/", (req, res) =>
-//   res.render(__dirname + "/views/home", { data: fieldsArr })
-// );
+app.get("/", (req, res) =>
+  res.render(__dirname + "/views/home", { modelsArr: arr, fieldsArr: fields})
+);
 
 // const arrowLine = require("arrow-line");
 // const arrow = arrowLine("#st", "#end", { color: "blue" });
