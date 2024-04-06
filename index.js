@@ -1,66 +1,84 @@
 #!/usr/bin/env node
 
-//CREATING BASIC EXPRESS APP
-const express = require("express");
-const app = express();
+const { spawn } = require("child_process");
+const chokidar = require('chokidar');
+const path = require("path");
 
-// CONFIGURING FOR ENV
-const dotenv = require("dotenv");
-dotenv.config();
+let nodeProcess = null;
+let processExited = true
+let pathsToWatch = [
+    path.join(process.cwd()+'/models', "/**/*.js")
+]
 
-// SUPPORT FOR JSON & PUBLIC FOLDER
-app.use(express.static(__dirname + "/public"));
-app.use(express.json());
+let previousReloadTimer = null;
 
-// SETTING VIEW ENGINE AS EJS
-app.set("view engine", "ejs");
-// REQUIRING PACKAGE TO CRAWL DIRECTORIES
-var read = require("read-directory");
+init()
 
-var contents = read.sync(process.cwd() + "/models");
+function init() {
+    nodeProcess = startProcess()
+    watchFiles()
+    process.on('SIGINT', async () => { await exitHandler() })
+    process.on('SIGTERM', async () => { await exitHandler() })
+    process.stdin.on('data', async (chunk) => {
+        const data = chunk.toString()
+        if (data.includes('rs')) {
+            await reload()
+        }
+    })
+}
 
-// console.log(contents)
+function startProcess() {
+    let childProcess = spawn('node', [__dirname+'/server.js'], {
+        stdio: [process.stdin, process.stdout, process.stderr]
+    })
 
-// GETTING MODEL FILE CONTENTS AS ARRAY
-const tables = Object.keys(contents);
-const attrs = {};
+    processExited = false
 
-// REQUIRING MODEL USING KEYS
-tables.map(
-  (table) =>
-    (attrs[`${table}+Model`] = require(process.cwd() + `/models/${table}`))
-);
-// CREATING ARRAY FOR DB MODELS
-const arr = Object.values(attrs);
+    childProcess.on('close', () => {
+        processExited = true
+        console.log('server restarting')
+    })
 
-// console.log(arr)
+    childProcess.on('error', () => {
+        processExited = true
+        console.log('Error occured')
+    })
 
-const fields = [];
-const models = []
-// EXTRACTING ATTRIBUTES FROM MODELS
-arr.forEach((model) => {
-  fields.push(model.schema.obj);
-  models.push(model.collection.collectionName);
-});
+    return childProcess
+}
 
-// console.log(fields)
-// console.log(models)
+function watchFiles() {
+    chokidar
+        .watch(pathsToWatch, {
+            ignored: "**/node_modules/*",
+            ignoreInitial: true
+        })
+        .on('all', async () => {
+            let debouncedTimer = setTimeout(async () => {
+                clearTimeout(previousReloadTimer)
+                await reload()
+            }, 1000)
+            previousReloadTimer = debouncedTimer
+        })
+}
 
-// const fieldsArr = [];
-// EXTRACTING DB COLUMNS VALUES
-// arr.forEach((item) => {
-//   fieldsArr.push(Object.values(item));
-// });
+async function reload() {
+    await stopProcess();
+    nodeProcess = startProcess()
+}
 
-//
-app.listen(3001, (req, res) => {
-  console.log(" visualization server up at http://localhost:3001");
-});
+async function stopProcess() {
+    return new Promise((resolve, reject) => {
+        nodeProcess.kill()
+        const key = setInterval(() => {
+            if (processExited) { }
+            clearInterval(key)
+            resolve(true)
+        }, 500)
+    })
+}
 
-// SETTING ROUTE TO home.ejs
-app.get("/", (req, res) =>
-  res.render(__dirname + "/views/home", { modelsArr: arr, fieldsArr: fields})
-);
-
-// const arrowLine = require("arrow-line");
-// const arrow = arrowLine("#st", "#end", { color: "blue" });
+async function exitHandler() {
+    await stopProcess()
+    process.exit()
+}

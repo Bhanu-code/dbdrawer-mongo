@@ -9,6 +9,8 @@ body{
   table {
     border-collapse: collapse;
     margin: auto;
+    background-color: rgb(253, 253, 235);
+    box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
   }
   
   .table-name{

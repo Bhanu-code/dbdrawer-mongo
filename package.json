@@ -14,10 +14,10 @@
   "license": "ISC",
   "dependencies": {
     "arrow-line": "^0.7.5",
+    "chokidar": "^3.6.0",
     "dotenv": "^16.4.5",
     "ejs": "^3.1.9",
     "express": "^4.19.2",
-    "mongoose": "^8.3.0",
     "read-directory": "^3.0.2"
   }
 }
