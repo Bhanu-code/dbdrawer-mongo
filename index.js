@@ -3,7 +3,6 @@
 const { spawn } = require("child_process");
 const chokidar = require('chokidar');
 const path = require("path");
-// const fs = require('fs')
 
 let nodeProcess = null;
 let processExited = true
@@ -55,6 +54,7 @@ function watchFiles() {
             ignoreInitial: true
         })
         .on('all', async () => {
+            console.log("files modified...")
             let debouncedTimer = setTimeout(async () => {
                 clearTimeout(previousReloadTimer)
                 await reload()

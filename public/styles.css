@@ -9,7 +9,7 @@ body{
   table {
     border-collapse: collapse;
     margin: auto;
-    background-color: rgb(253, 253, 235);
+    background-color: rgb(252, 252, 216);
     box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
   }
   
@@ -24,7 +24,7 @@ body{
   }
   
   tr:nth-child(even) {
-    background-color: #d6eeee;
+    background-color: #e1f8f8;
   }
   
   .flag {

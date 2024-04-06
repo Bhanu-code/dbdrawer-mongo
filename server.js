@@ -3,6 +3,7 @@
 const express = require("express");
 const app = express();
 
+
 // CONFIGURING FOR ENV
 const dotenv = require("dotenv");
 dotenv.config();
@@ -45,16 +46,17 @@ arr.forEach((model) => {
 // console.log(fields)
 // console.log(models)
 
-//
-// console.log("some")
-var server = app.listen(3001, (req, res) => {
-  console.log(" visualization server up at http://localhost:3001");
-});
 
+//listening to requests
+app.listen(3001, (req, res) => {
+  console.log("visualization server up at http://localhost:3001");
+});
 
 // SETTING ROUTE TO home.ejs
 app.get("/", (req, res) =>{
   res.render(__dirname + "/views/home", { modelsArr: arr, fieldsArr: fields})
 });
+
+
 
 
